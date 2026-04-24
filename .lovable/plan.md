@@ -1,44 +1,31 @@
-# Synchronized Product Gallery with SwiperJS
+## Plan: Convert project to JS + fix gallery synchronization
 
-## Goal
-Build a product gallery using **SwiperJS** with bidirectional synchronization between a main slider and a vertical thumbnail slider. Layout order (left → right):
+### 1. Convert entire project from TypeScript → JavaScript
+- Rename all `.ts`/`.tsx` → `.js`/`.jsx`, strip type annotations, interfaces, generics, and `as` casts.
+  - Includes `src/main.tsx`, `src/App.tsx`, all of `src/components/**` (including `src/components/ui/**`), `src/hooks/**`, `src/lib/utils.ts`, `src/pages/**`, `src/test/**`.
+- Delete TS-only files: `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `src/vite-env.d.ts`.
+- Convert configs to JS: `vite.config.ts` → `vite.config.js`, `tailwind.config.ts` → `tailwind.config.js`, `vitest.config.ts` → `vitest.config.js`.
+- Update `package.json`: remove `typescript`, `typescript-eslint`, `@types/*` devDependencies; keep vitest working with JS.
+- Update `eslint.config.js` to drop `typescript-eslint` and lint `.js`/`.jsx` only.
+- Update `index.html` script src to `/src/main.jsx`.
+- Update `components.json` → `tsx: false` so future shadcn additions are JSX.
+- Heads up: ~60 files touched. App look/behavior should be identical.
 
-**Main image · Vertical thumbnail swiper · Product info + CTA**
+### 2. Fix true bidirectional sync in `ProductGallery.jsx`
+- Keep both Swiper instances controlled via React state (`mainSwiper`, `thumbsSwiper`).
+- Keep `Thumbs` module **only for active-thumbnail highlight styling**, not navigation.
+- Add explicit, loop-safe handlers:
+  - Main `onSlideChange` → `thumbsSwiper.slideToLoop(main.realIndex)`.
+  - Thumbs `onSlideChange` → `mainSwiper.slideToLoop(thumbs.realIndex)`.
+  - Thumbs `onClick` → read `clickedSlide.dataset.swiperSlideIndex` (loop-safe real index) → `slideToLoop` on both. Fixes "click thumb 4 → main jumps to 4" across loop duplicates.
+  - Up/Down nav buttons → plain `onClick` calling `mainSwiper.slidePrev()` / `slideNext()`. Main's `slideChange` then auto-syncs thumbs. Fixes the current bug where buttons only moved thumbs.
+- Use `isSyncingRef` flag to prevent ping-pong feedback loops.
+- Drop the `Navigation` module from the thumbs swiper.
+- Keep `loop`, `mousewheel`, `keyboard`, and 3-thumbnails-visible behavior unchanged.
 
-## Three States (driven by image count)
+### 3. Unchanged
+- `src/components/gallery.css`, `src/index.css`, `src/App.css`, `public/*`.
 
-1. **1 image** — Main slider only (no thumbnails). Product info to the right.
-2. **2 images** — Main slider + vertical thumbnail column showing both thumbs. No nav buttons needed.
-3. **5+ images** — Main slider + vertical thumbnail column with **3 thumbnails visible**, plus `ChevronUp` / `ChevronDown` navigation buttons above and below the thumbnail strip.
-
-## Synchronization
-Using Swiper's `thumbs` module + a controlled `activeIndex`:
-- Drag/swipe on either slider updates the other.
-- Click a thumbnail → main slider jumps to it.
-- Click up/down nav buttons → both sliders advance.
-- Keyboard arrows work on the focused slider and propagate.
-
-## Files
-
-### New
-- `src/components/ProductGallery.tsx` — accepts `images: string[]`, renders the correct state, owns both Swiper instances and the sync logic.
-- `src/components/ProductInfo.tsx` — placeholder title, description, price, and a CTA `Button` (shadcn).
-- `src/components/gallery.css` — minimal overrides for Swiper (thumbnail active border, nav button styling).
-
-### Modified
-- `src/pages/Index.tsx` — demo page with a small toggle (1 / 2 / 5 images) to showcase all three states. Layout: gallery on the left, `ProductInfo` on the right.
-- `package.json` — add `swiper` dependency.
-
-## Layout details
-- Desktop and mobile both keep vertical thumbnails (per your earlier choice).
-- Main image uses an aspect-ratio container so it stays stable across states.
-- Thumbnail column width is fixed (~80–96px). Active thumb gets a primary-colored border.
-- Nav buttons (multi state only) are circular `ghost` buttons with Lucide `ChevronUp` / `ChevronDown`, disabled at start/end.
-
-## Demo data
-Three sample arrays using Unsplash placeholder images: 1 image, 2 images, 5 images. A simple segmented control in `Index.tsx` switches between them so you can verify all states.
-
-## Out of scope
-No backend, no real product data, no zoom/lightbox (can be added later).
-
-Ready to implement on approval.
+### Result
+- Pure JS/JSX/CSS/HTML — no TypeScript anywhere.
+- In multi-image state: dragging main, dragging thumbs, clicking any thumbnail (incl. jumping #2 → #4), pressing up/down nav, mouse wheel on thumbs, and keyboard arrows all keep both sliders in perfect sync — including across loop boundaries.
