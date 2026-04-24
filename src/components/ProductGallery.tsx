@@ -51,6 +51,7 @@ const ProductGallery = ({ images, className }: ProductGalleryProps) => {
             spaceBetween={10}
             keyboard={{ enabled: true }}
             allowTouchMove={!isSingle}
+            loop={isMulti}
             className="gallery-main h-full w-full"
           >
             {images.map((src, i) => (
@@ -100,6 +101,8 @@ const ProductGallery = ({ images, className }: ProductGalleryProps) => {
               spaceBetween={10}
               slidesPerView={isMulti ? 3 : 2}
               watchSlidesProgress
+              loop={isMulti}
+              
               mousewheel={{ forceToAxis: true }}
               navigation={
                 showNavButtons
