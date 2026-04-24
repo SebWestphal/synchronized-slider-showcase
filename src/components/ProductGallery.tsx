@@ -111,10 +111,9 @@ const ProductGallery = ({ images, className }: ProductGalleryProps) => {
               }
               onBeforeInit={(swiper) => {
                 if (showNavButtons && swiper.params.navigation && typeof swiper.params.navigation === "object") {
-                  // @ts-expect-error swiper navigation refs
-                  swiper.params.navigation.prevEl = prevBtnRef.current;
-                  // @ts-expect-error swiper navigation refs
-                  swiper.params.navigation.nextEl = nextBtnRef.current;
+                  const nav = swiper.params.navigation as { prevEl: HTMLElement | null; nextEl: HTMLElement | null };
+                  nav.prevEl = prevBtnRef.current;
+                  nav.nextEl = nextBtnRef.current;
                 }
               }}
               onClick={(swiper) => {
