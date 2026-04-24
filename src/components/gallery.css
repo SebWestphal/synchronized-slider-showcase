@@ -1,0 +1,31 @@
+/* Swiper gallery overrides using design system tokens */
+
+.gallery-thumbs .swiper-slide {
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.gallery-thumbs .swiper-slide:hover {
+  opacity: 0.85;
+}
+
+.gallery-thumbs .swiper-slide-thumb-active {
+  opacity: 1;
+  border-color: hsl(var(--primary));
+}
+
+.gallery-main .swiper-slide {
+  background: hsl(var(--muted));
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.gallery-main,
+.gallery-thumbs {
+  width: 100%;
+  height: 100%;
+}
