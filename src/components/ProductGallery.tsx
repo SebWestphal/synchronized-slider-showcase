@@ -102,7 +102,7 @@ const ProductGallery = ({ images, className }: ProductGalleryProps) => {
               slidesPerView={isMulti ? 3 : 2}
               watchSlidesProgress
               loop={isMulti}
-              loopedSlides={isMulti ? count : undefined}
+              
               mousewheel={{ forceToAxis: true }}
               navigation={
                 showNavButtons
